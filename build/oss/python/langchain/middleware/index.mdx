@@ -1,0 +1,89 @@
+---
+title: Middleware
+description: Control and customize agent execution at every step
+---
+
+Middleware provides a way to more tightly control what happens inside the agent.
+
+The core agent loop involves calling a model, letting it choose tools to execute, and then finishing when it calls no more tools:
+
+<div style={{ display: "flex", justifyContent: "center" }}>
+    <img
+        src="/oss/images/core_agent_loop.png"
+        alt="Core agent loop diagram"
+        className="rounded-lg"
+    />
+</div>
+
+Middleware exposes hooks before and after each of those steps:
+
+<div style={{ display: "flex", justifyContent: "center" }}>
+    <img
+        src="/oss/images/middleware_final.png"
+        alt="Middleware flow diagram"
+        className="rounded-lg"
+    />
+</div>
+
+## What can middleware do?
+
+<CardGroup cols={2}>
+    <Card title="Monitor" icon="chart-line">
+        Track agent behavior with logging, analytics, and debugging
+    </Card>
+    <Card title="Modify" icon="pencil">
+        Transform prompts, tool selection, and output formatting
+    </Card>
+    <Card title="Control" icon="sliders">
+        Add retries, fallbacks, and early termination logic
+    </Card>
+    <Card title="Enforce" icon="shield">
+        Apply rate limits, guardrails, and PII detection
+    </Card>
+</CardGroup>
+
+Add middleware by passing them to [`create_agent`](https://reference.langchain.com/python/langchain/agents/#langchain.agents.create_agent):
+
+
+```python
+from langchain.agents import create_agent
+from langchain.agents.middleware import SummarizationMiddleware, HumanInTheLoopMiddleware
+
+agent = create_agent(
+    model="gpt-4o",
+    tools=[...],
+    middleware=[
+        SummarizationMiddleware(...),
+        HumanInTheLoopMiddleware(...)
+    ],
+)
+```
+
+
+
+
+## Next steps
+
+<CardGroup cols={2}>
+    <Card title="Built-in middleware" icon="box" href="/oss/python/langchain/middleware/built-in">
+        Explore prebuilt middleware for common use cases
+    </Card>
+    <Card title="Custom middleware" icon="code" href="/oss/python/langchain/middleware/custom">
+        Build your own middleware with hooks and decorators
+    </Card>
+</CardGroup>
+
+## Additional resources
+
+- [Middleware API reference](https://reference.langchain.com/python/langchain/middleware/)
+- [Human-in-the-loop guide](/oss/python/langchain/human-in-the-loop)
+- [Testing agents](/oss/python/langchain/test)
+
+---
+
+<Callout icon="pen-to-square" iconType="regular">
+    [Edit the source of this page on GitHub.](https://github.com/langchain-ai/docs/edit/main/src/oss/langchain/middleware/index.mdx)
+</Callout>
+<Tip icon="terminal" iconType="regular">
+    [Connect these docs programmatically](/use-these-docs) to Claude, VSCode, and more via MCP for    real-time answers.
+</Tip>
