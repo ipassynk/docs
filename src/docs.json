@@ -753,6 +753,7 @@
                 {
                   "group": "Server customization",
                   "pages": [
+                      "langsmith/caching",
                       "langsmith/custom-store",
                       "langsmith/custom-checkpointer",
                       "langsmith/custom-lifespan",
