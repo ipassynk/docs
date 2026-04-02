@@ -2,7 +2,10 @@
 title: Streaming API
 sidebarTitle: Streaming API
 ---
-[LangGraph SDK](/langsmith/langgraph-python-sdk) allows you to [stream outputs](/oss/python/langgraph/streaming/) from the [LangSmith Deployment API](/langsmith/server-api-ref).
+
+Agents need to show their work in real time. Agent Server provides resumable streaming: if a client disconnects mid-stream (network switch, tab sleep, mobile backgrounding), it reconnects and picks up where it left off. Multiple streaming modes give you control over granularity, from full state snapshots after each step to token-by-token LLM output as it arrives from the provider.
+
+The [LangGraph SDK](/langsmith/langgraph-python-sdk) allows you to [stream outputs](/oss/python/langgraph/streaming/) from the [LangSmith Deployment API](/langsmith/server-api-ref).
 
 <Note>
 LangGraph SDK and Agent Server are a part of [LangSmith](/langsmith/home).
@@ -200,7 +203,7 @@ Basic usage example:
         </Tab>
     </Tabs>
 
-  ```output
+  ```python
   {'run_id': '1f02c2b3-3cef-68de-b720-eec2a4a8e920', 'attempt': 1}
   {'refine_topic': {'topic': 'ice cream and cats'}}
   {'generate_joke': {'joke': 'This is a joke about ice cream and cats'}}
@@ -211,11 +214,11 @@ Basic usage example:
 
 | Mode                             | Description                                                                                                                                                                         | LangGraph Library Method                                                                                 |
 |----------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------|
-| [`values`](#stream-graph-state)  | Stream the full graph state after each [super-step](/langsmith/graph-rebuild#graphs).                                                                                            | `.stream()` / `.astream()` with [`stream_mode="values"`](/oss/python/langgraph/streaming#stream-graph-state)  |
-| [`updates`](#stream-graph-state) | Streams the updates to the state after each step of the graph. If multiple updates are made in the same step (e.g., multiple nodes are run), those updates are streamed separately. | `.stream()` / `.astream()` with [`stream_mode="updates"`](/oss/python/langgraph/streaming#stream-graph-state) |
+| [`values`](#stream-graph-state)  | Stream the full graph state after each [super-step](/langsmith/graph-rebuild#define-graphs).                                                                                            | `.stream()` / `.astream()` with [`stream_mode="values"`](/oss/python/langgraph/streaming#graph-state)  |
+| [`updates`](#stream-graph-state) | Streams the updates to the state after each step of the graph. If multiple updates are made in the same step (e.g., multiple nodes are run), those updates are streamed separately. | `.stream()` / `.astream()` with [`stream_mode="updates"`](/oss/python/langgraph/streaming#graph-state) |
 | [`messages-tuple`](#messages)    | Streams LLM tokens and metadata for the graph node where the LLM is invoked (useful for chat apps).                                                                                 | `.stream()` / `.astream()` with [`stream_mode="messages"`](/oss/python/langgraph/streaming#messages)          |
-| [`debug`](#debug)                | Streams as much information as possible throughout the execution of the graph.                                                                                                      | `.stream()` / `.astream()` with [`stream_mode="debug"`](/oss/python/langgraph/streaming#stream-graph-state)   |
-| [`custom`](#stream-custom-data)  | Streams custom data from inside your graph                                                                                                                                          | `.stream()` / `.astream()` with [`stream_mode="custom"`](/oss/python/langgraph/streaming#stream-custom-data)  |
+| [`debug`](#debug)                | Streams as much information as possible throughout the execution of the graph.                                                                                                      | `.stream()` / `.astream()` with [`stream_mode="debug"`](/oss/python/langgraph/streaming#graph-state)   |
+| [`custom`](#stream-custom-data)  | Streams custom data from inside your graph                                                                                                                                          | `.stream()` / `.astream()` with [`stream_mode="custom"`](/oss/python/langgraph/streaming#custom-data)  |
 | [`events`](#stream-events)       | Stream all events (including the state of the graph); mainly useful when migrating large LCEL apps.                                                                                 | `.astream_events()`                                                                                      |
 
 ### Stream multiple modes
@@ -344,7 +347,7 @@ curl --request POST \
 If you don't need to persist the outputs of a run, you can pass `None` instead of `thread_id` when streaming.
 </Note>
 
-### Stream Mode: `updates`
+### Stream mode: `updates`
 
 Use this to stream only the **state updates** returned by the nodes after each step. The streamed outputs include the name of the node as well as the update.
 
@@ -389,7 +392,7 @@ Use this to stream only the **state updates** returned by the nodes after each s
     </Tab>
 </Tabs>
 
-### Stream Mode: `values`
+### Stream mode: `values`
 
 Use this to stream the **full state** of the graph after each step.
 
@@ -649,7 +652,7 @@ The streamed output from [`messages-tuple` mode](#supported-stream-modes) is a t
         topic: str
         joke: str = ""
 
-    model = init_chat_model(model="gpt-4o-mini")
+    model = init_chat_model(model="gpt-4.1-mini")
 
     def call_model(state: MyState):
         """Call the LLM to generate a joke about a topic"""
@@ -930,13 +933,15 @@ When you use `.join_stream`, output is not buffered, so any output produced befo
 
 ## API reference
 
-For API usage and implementation, refer to the [API reference](https://langchain-ai.github.io/langgraph/cloud/reference/api/api_ref.html#tag/thread-runs/POST/threads/{thread_id}/runs/stream).
+For API usage and implementation, refer to the [API reference](https://docs.langchain.com/langsmith/server-api-ref#tag/thread-runs/POST/threads/{thread_id}/runs/stream).
 
 ---
 
-<Callout icon="pen-to-square" iconType="regular">
-    [Edit the source of this page on GitHub.](https://github.com/langchain-ai/docs/edit/main/src/langsmith/streaming.mdx)
+<div className="source-links">
+<Callout icon="edit">
+    [Edit this page on GitHub](https://github.com/langchain-ai/docs/edit/main/src/langsmith/streaming.mdx) or [file an issue](https://github.com/langchain-ai/docs/issues/new/choose).
 </Callout>
-<Tip icon="terminal" iconType="regular">
-    [Connect these docs programmatically](/use-these-docs) to Claude, VSCode, and more via MCP for    real-time answers.
-</Tip>
+<Callout icon="terminal-2">
+    [Connect these docs](/use-these-docs) to Claude, VSCode, and more via MCP for real-time answers.
+</Callout>
+</div>

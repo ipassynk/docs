@@ -1,5 +1,6 @@
 ---
-title: TiDB
+title: "TiDB integrations"
+description: "Integrate with TiDB using LangChain Python."
 ---
 
 > [TiDB Cloud](https://www.pingcap.com/tidb-serverless), is a comprehensive Database-as-a-Service (DBaaS) solution,
@@ -9,7 +10,7 @@ title: TiDB
 > technical stacks. Create a free TiDB Serverless cluster and start using the vector search feature at https://pingcap.com/ai.
 
 
-## Installation and Setup
+## Installation and setup
 
 You have to get the connection details for the TiDB database.
 Visit the [TiDB Cloud](https://tidbcloud.com/) to get the connection details.
@@ -20,20 +21,22 @@ Visit the [TiDB Cloud](https://tidbcloud.com/) to get the connection details.
 ```python
 from langchain_community.document_loaders import TiDBLoader
 ```
-Please refer the details [here](/oss/python/integrations/document_loaders/tidb).
+See the [TiDB document loader documentation](/oss/python/integrations/document_loaders/tidb) for details.
 
 ## Vector store
 
 ```python
 from langchain_community.vectorstores import TiDBVectorStore
 ```
-Please refer the details [here](/oss/python/integrations/vectorstores/tidb_vector).
+See the [TiDB vector store documentation](/oss/python/integrations/vectorstores/tidb_vector) for details.
 
 ---
 
-<Callout icon="pen-to-square" iconType="regular">
-    [Edit the source of this page on GitHub.](https://github.com/langchain-ai/docs/edit/main/src/oss/python/integrations/providers/tidb.mdx)
+<div className="source-links">
+<Callout icon="edit">
+    [Edit this page on GitHub](https://github.com/langchain-ai/docs/edit/main/src/oss/python/integrations/providers/tidb.mdx) or [file an issue](https://github.com/langchain-ai/docs/issues/new/choose).
 </Callout>
-<Tip icon="terminal" iconType="regular">
-    [Connect these docs programmatically](/use-these-docs) to Claude, VSCode, and more via MCP for    real-time answers.
-</Tip>
+<Callout icon="terminal-2">
+    [Connect these docs](/use-these-docs) to Claude, VSCode, and more via MCP for real-time answers.
+</Callout>
+</div>

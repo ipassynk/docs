@@ -1,8 +1,9 @@
 ---
-title: JSONLoader
+title: "JSONLoader integration"
+description: "Integrate with the JSONLoader document loader using LangChain Python."
 ---
 
-This guide provides a quick overview for getting started with JSON [document loader](https://python.langchain.com/docs/concepts/document_loaders). For detailed documentation of all JSONLoader features and configurations head to the [API reference](https://python.langchain.com/api_reference/community/document_loaders/langchain_community.document_loaders.json_loader.JSONLoader.html).
+This guide provides a quick overview for getting started with the `JSONLoader` [document loader](/oss/python/integrations/document_loaders). For detailed documentation of all `JSONLoader` features and configurations head to the [API reference](https://reference.langchain.com/python/langchain-community/document_loaders/json_loader/JSONLoader).
 
 - TODO: Add any other relevant links, like information about underlying API, etc.
 
@@ -12,13 +13,13 @@ This guide provides a quick overview for getting started with JSON [document loa
 
 | Class | Package | Local | Serializable | [JS support](https://js.langchain.com/docs/integrations/document_loaders/file_loaders/json/)|
 | :--- | :--- | :---: | :---: |  :---: |
-| [JSONLoader](https://python.langchain.com/api_reference/community/document_loaders/langchain_community.document_loaders.json_loader.JSONLoader.html) | [langchain-community](https://python.langchain.com/api_reference/community/index.html) | ✅ | ❌ | ✅ |
+| [`JSONLoader`](https://reference.langchain.com/python/langchain-community/document_loaders/json_loader/JSONLoader) | [`langchain-community`](https://reference.langchain.com/python/langchain-community) | ✅ | ❌ | ✅ |
 
 ### Loader features
 
 | Source | Document Lazy Loading | Native Async Support
 | :---: | :---: | :---: |
-| JSONLoader | ✅ | ❌ |
+| `JSONLoader` | ✅ | ❌ |
 
 ## Setup
 
@@ -28,7 +29,7 @@ To access JSON document loader you'll need to install the `langchain-community` 
 
 No credentials are required to use the `JSONLoader` class.
 
-To enable automated tracing of your model calls, set your [LangSmith](https://docs.smith.langchain.com/) API key:
+To enable automated tracing of your model calls, set your [LangSmith](/langsmith/home) API key:
 
 ```python
 os.environ["LANGSMITH_API_KEY"] = getpass.getpass("Enter your LangSmith API key: ")
@@ -66,7 +67,7 @@ docs = loader.load()
 docs[0]
 ```
 
-```output
+```text
 Document(metadata={'source': '/Users/isaachershenson/Documents/langchain/docs/docs/integrations/document_loaders/example_data/facebook_chat.json', 'seq_num': 1}, page_content='Bye!')
 ```
 
@@ -74,11 +75,11 @@ Document(metadata={'source': '/Users/isaachershenson/Documents/langchain/docs/do
 print(docs[0].metadata)
 ```
 
-```output
+```python
 {'source': '/Users/isaachershenson/Documents/langchain/docs/docs/integrations/document_loaders/example_data/facebook_chat.json', 'seq_num': 1}
 ```
 
-## Lazy Load
+## Lazy load
 
 ```python
 pages = []
@@ -91,7 +92,7 @@ for doc in loader.lazy_load():
         pages = []
 ```
 
-## Read from JSON Lines file
+## Read from JSON lines file
 
 If you want to load documents from a JSON Lines file, you pass `json_lines=True`
 and specify `jq_schema` to extract `page_content` from a single JSON object.
@@ -108,7 +109,7 @@ docs = loader.load()
 print(docs[0])
 ```
 
-```output
+```python
 page_content='Bye!' metadata={'source': '/Users/isaachershenson/Documents/langchain/docs/docs/integrations/document_loaders/example_data/facebook_chat_messages.jsonl', 'seq_num': 1}
 ```
 
@@ -128,7 +129,7 @@ docs = loader.load()
 print(docs[0])
 ```
 
-```output
+```python
 page_content='User 2' metadata={'source': '/Users/isaachershenson/Documents/langchain/docs/docs/integrations/document_loaders/example_data/facebook_chat_messages.jsonl', 'seq_num': 1}
 ```
 
@@ -148,7 +149,7 @@ docs = loader.load()
 print(docs[0])
 ```
 
-```output
+```python
 page_content='Bye!' metadata={'source': '/Users/isaachershenson/Documents/langchain/docs/docs/integrations/document_loaders/example_data/facebook_chat.json', 'seq_num': 1}
 ```
 
@@ -162,7 +163,7 @@ There are some key changes to be noted. In the previous example where we didn't 
 
 In this example, we have to tell the loader to iterate over the records in the `messages` field. The jq_schema then has to be `.messages[]`
 
-This allows us to pass the records (dict) into the `metadata_func` that has to be implemented. The `metadata_func` is responsible for identifying which pieces of information in the record should be included in the metadata stored in the final [`Document`](https://reference.langchain.com/python/langchain_core/documents/#langchain_core.documents.base.Document) object.
+This allows us to pass the records (dict) into the `metadata_func` that has to be implemented. The `metadata_func` is responsible for identifying which pieces of information in the record should be included in the metadata stored in the final [`Document`](https://reference.langchain.com/python/langchain-core/documents/base/Document) object.
 
 Additionally, we now have to explicitly specify in the loader, via the `content_key` argument, the key from the record where the value for the `page_content` needs to be extracted from.
 
@@ -186,7 +187,7 @@ docs = loader.load()
 print(docs[0].metadata)
 ```
 
-```output
+```python
 {'source': '/Users/isaachershenson/Documents/langchain/docs/docs/integrations/document_loaders/example_data/facebook_chat.json', 'seq_num': 1, 'sender_name': 'User 2', 'timestamp_ms': 1675597571851}
 ```
 
@@ -194,13 +195,15 @@ print(docs[0].metadata)
 
 ## API reference
 
-For detailed documentation of all JSONLoader features and configurations head to the API reference: [python.langchain.com/api_reference/community/document_loaders/langchain_community.document_loaders.json_loader.JSONLoader.html](https://python.langchain.com/api_reference/community/document_loaders/langchain_community.document_loaders.json_loader.JSONLoader.html)
+For detailed documentation of all `JSONLoader` features and configurations head to the [API reference](https://reference.langchain.com/python/langchain-community/document_loaders/json_loader/JSONLoader)
 
 ---
 
-<Callout icon="pen-to-square" iconType="regular">
-    [Edit the source of this page on GitHub.](https://github.com/langchain-ai/docs/edit/main/src/oss/python/integrations/document_loaders/json.mdx)
+<div className="source-links">
+<Callout icon="edit">
+    [Edit this page on GitHub](https://github.com/langchain-ai/docs/edit/main/src/oss/python/integrations/document_loaders/json.mdx) or [file an issue](https://github.com/langchain-ai/docs/issues/new/choose).
 </Callout>
-<Tip icon="terminal" iconType="regular">
-    [Connect these docs programmatically](/use-these-docs) to Claude, VSCode, and more via MCP for    real-time answers.
-</Tip>
+<Callout icon="terminal-2">
+    [Connect these docs](/use-these-docs) to Claude, VSCode, and more via MCP for real-time answers.
+</Callout>
+</div>

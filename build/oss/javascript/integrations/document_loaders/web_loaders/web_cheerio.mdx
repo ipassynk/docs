@@ -1,9 +1,10 @@
 ---
-title: Cheerio
+title: "Cheerio integration"
+description: "Integrate with the Cheerio document loader using LangChain JavaScript."
 ---
 
 
-This notebook provides a quick overview for getting started with [CheerioWebBaseLoader](/oss/javascript/integrations/document_loaders/). For detailed documentation of all CheerioWebBaseLoader features and configurations head to the [API reference](https://api.js.langchain.com/classes/langchain_community_document_loaders_web_cheerio.CheerioWebBaseLoader.html).
+This notebook provides a quick overview for getting started with `CheerioWebBaseLoader` [document loaders](/oss/javascript/integrations/document_loaders/). For detailed documentation of all `CheerioWebBaseLoader` features and configurations head to the [API reference](https://reference.langchain.com/javascript/langchain-community/document_loaders/web/cheerio/CheerioWebBaseLoader).
 
 ## Overview
 
@@ -17,13 +18,13 @@ However, Cheerio does not simulate a web browser, so it cannot execute JavaScrip
 
 | Class | Package | Local | Serializable | PY support|
 | :--- | :--- | :---: | :---: |  :---: |
-| [CheerioWebBaseLoader](https://api.js.langchain.com/classes/langchain_community_document_loaders_web_cheerio.CheerioWebBaseLoader.html) | @langchain/community | ✅ | ✅ | ❌ |
+| [`CheerioWebBaseLoader`](https://reference.langchain.com/javascript/langchain-community/document_loaders/web/cheerio/CheerioWebBaseLoader) | @langchain/community | ✅ | ✅ | ❌ |
 
 ### Loader features
 
 | Source | Web Support | Node Support
 | :---: | :---: | :---: |
-| CheerioWebBaseLoader | ✅ | ✅ |
+| `CheerioWebBaseLoader` | ✅ | ✅ |
 
 ## Setup
 
@@ -31,7 +32,7 @@ To access `CheerioWebBaseLoader` document loader you'll need to install the `@la
 
 ### Credentials
 
-If you want to get automated tracing of your model calls you can also set your [LangSmith](https://docs.smith.langchain.com/) API key by uncommenting below:
+If you want to get automated tracing of your model calls you can also set your [LangSmith](/langsmith/home) API key by uncommenting below:
 
 ```bash
 # export LANGSMITH_TRACING="true"
@@ -73,7 +74,7 @@ const docs = await loader.load()
 docs[0]
 ```
 
-```output
+```javascript
 Document {
   pageContent: '\n' +
     '        \n' +
@@ -170,7 +171,7 @@ Document {
 console.log(docs[0].metadata)
 ```
 
-```output
+```javascript
 { source: 'https://news.ycombinator.com/item?id=34817881' }
 ```
 
@@ -189,7 +190,7 @@ const docsWithSelector = await loaderWithSelector.load();
 docsWithSelector[0].pageContent;
 ```
 
-```output
+```text
 Some of my favourite simulation projects:- IllustrisTNG: https://www.tng-project.org/- SWIFT: https://swift.dur.ac.uk/- CO5BOLD: https://www.astro.uu.se/~bf/co5bold_main.html (which produced these animations of a red-giant star: https://www.astro.uu.se/~bf/movie/AGBmovie.html)- AbacusSummit: https://abacussummit.readthedocs.io/en/latest/And I can add the simulations in the article, too.
 ```
 
@@ -197,13 +198,15 @@ Some of my favourite simulation projects:- IllustrisTNG: https://www.tng-project
 
 ## API reference
 
-For detailed documentation of all CheerioWebBaseLoader features and configurations head to the [API reference](https://api.js.langchain.com/classes/langchain_community_document_loaders_web_cheerio.CheerioWebBaseLoader.html).
+For detailed documentation of all `CheerioWebBaseLoader` features and configurations head to the [API reference](https://reference.langchain.com/javascript/langchain-community/document_loaders/web/cheerio/CheerioWebBaseLoader).
 
 ---
 
-<Callout icon="pen-to-square" iconType="regular">
-    [Edit the source of this page on GitHub.](https://github.com/langchain-ai/docs/edit/main/src/oss/javascript/integrations/document_loaders/web_loaders/web_cheerio.mdx)
+<div className="source-links">
+<Callout icon="edit">
+    [Edit this page on GitHub](https://github.com/langchain-ai/docs/edit/main/src/oss/javascript/integrations/document_loaders/web_loaders/web_cheerio.mdx) or [file an issue](https://github.com/langchain-ai/docs/issues/new/choose).
 </Callout>
-<Tip icon="terminal" iconType="regular">
-    [Connect these docs programmatically](/use-these-docs) to Claude, VSCode, and more via MCP for    real-time answers.
-</Tip>
+<Callout icon="terminal-2">
+    [Connect these docs](/use-these-docs) to Claude, VSCode, and more via MCP for real-time answers.
+</Callout>
+</div>

@@ -1,5 +1,7 @@
 ---
-title: Hugging Face
+title: "Hugging Face integrations"
+description: "Integrate with Hugging Face using LangChain Python."
+sidebarTitle: "Hugging Face"
 ---
 
 This page covers all LangChain integrations with [Hugging Face Hub](https://huggingface.co/) and libraries like [transformers](https://huggingface.co/docs/transformers/index), [sentence transformers](https://sbert.net/), and [datasets](https://huggingface.co/docs/datasets/index).
@@ -50,13 +52,13 @@ See a [usage example](/oss/python/integrations/llms/huggingface_pipelines).
 from langchain_huggingface import HuggingFacePipeline
 ```
 
-## Embedding Models
+## Embedding models
 
 ### HuggingFaceEmbeddings
 
 We can use the `HuggingFaceEmbeddings` class to run open source embedding models locally.
 
-See a [usage example](/oss/python/integrations/text_embedding/huggingfacehub).
+See a [usage example](/oss/python/integrations/embeddings/huggingfacehub).
 
 ```python
 from langchain_huggingface import HuggingFaceEmbeddings
@@ -66,7 +68,7 @@ from langchain_huggingface import HuggingFaceEmbeddings
 
 We can use the `HuggingFaceEndpointEmbeddings` class to run open source embedding models via a dedicated [Inference Endpoint](https://huggingface.co/inference-endpoints/dedicated).
 
-See a [usage example](/oss/python/integrations/text_embedding/huggingfacehub).
+See a [usage example](/oss/python/integrations/embeddings/huggingfacehub).
 
 ```python
 from langchain_huggingface import HuggingFaceEndpointEmbeddings
@@ -76,7 +78,7 @@ from langchain_huggingface import HuggingFaceEndpointEmbeddings
 
 We can use the `HuggingFaceInferenceAPIEmbeddings` class to run open source embedding models via [Inference Providers](https://huggingface.co/docs/inference-providers).
 
-See a [usage example](/oss/python/integrations/text_embedding/huggingfacehub).
+See a [usage example](/oss/python/integrations/embeddings/huggingfacehub).
 
 ```python
 from langchain_community.embeddings import HuggingFaceInferenceAPIEmbeddings
@@ -86,7 +88,7 @@ from langchain_community.embeddings import HuggingFaceInferenceAPIEmbeddings
 
 We can use the `HuggingFaceInstructEmbeddings` class to run open source embedding models locally.
 
-See a [usage example](/oss/python/integrations/text_embedding/instruct_embeddings).
+See a [usage example](/oss/python/integrations/embeddings/instruct_embeddings).
 
 ```python
 from langchain_community.embeddings import HuggingFaceInstructEmbeddings
@@ -97,7 +99,7 @@ from langchain_community.embeddings import HuggingFaceInstructEmbeddings
 >[BGE models on the HuggingFace](https://huggingface.co/BAAI/bge-large-en-v1.5) are one of [the best open-source embedding models](https://huggingface.co/spaces/mteb/leaderboard).
 >BGE model is created by the [Beijing Academy of Artificial Intelligence (BAAI)](https://en.wikipedia.org/wiki/Beijing_Academy_of_Artificial_Intelligence). `BAAI` is a private non-profit organization engaged in AI research and development.
 
-See a [usage example](/oss/python/integrations/text_embedding/bge_huggingface).
+See a [usage example](/oss/python/integrations/embeddings/bge_huggingface).
 
 ```python
 from langchain_community.embeddings import HuggingFaceBgeEmbeddings
@@ -168,7 +170,7 @@ from langchain_community.document_loaders import ImageCaptionLoader
 
 ## Tools
 
-### Hugging Face Hub Tools
+### Hugging Face hub tools
 
 >[Hugging Face Tools](https://huggingface.co/docs/transformers/v4.29.0/en/custom_tools)
 > support text I/O and are loaded using the `load_huggingface_tool` function.
@@ -191,7 +193,7 @@ See a [usage example](/oss/python/integrations/tools/huggingface_tools).
 from langchain_community.agent_toolkits.load_tools import load_huggingface_tool
 ```
 
-### Hugging Face Text-to-Speech Model Inference.
+### Hugging Face Text-to-Speech model inference.
 
 > It is a wrapper around `OpenAI Text-to-Speech API`.
 
@@ -201,9 +203,11 @@ from langchain_community.tools.audio import HuggingFaceTextToSpeechModelInferenc
 
 ---
 
-<Callout icon="pen-to-square" iconType="regular">
-    [Edit the source of this page on GitHub.](https://github.com/langchain-ai/docs/edit/main/src/oss/python/integrations/providers/huggingface.mdx)
+<div className="source-links">
+<Callout icon="edit">
+    [Edit this page on GitHub](https://github.com/langchain-ai/docs/edit/main/src/oss/python/integrations/providers/huggingface.mdx) or [file an issue](https://github.com/langchain-ai/docs/issues/new/choose).
 </Callout>
-<Tip icon="terminal" iconType="regular">
-    [Connect these docs programmatically](/use-these-docs) to Claude, VSCode, and more via MCP for    real-time answers.
-</Tip>
+<Callout icon="terminal-2">
+    [Connect these docs](/use-these-docs) to Claude, VSCode, and more via MCP for real-time answers.
+</Callout>
+</div>

@@ -1,5 +1,6 @@
 ---
-title: Llamafile
+title: "Llamafile integration"
+description: "Integrate with the Llamafile LLM using LangChain Python."
 ---
 
 [Llamafile](https://github.com/Mozilla-Ocho/llamafile) lets you distribute and run LLMs with a single file.
@@ -26,7 +27,7 @@ chmod +x TinyLlama-1.1B-Chat-v1.0.Q5_K_M.llamafile  # run if you're on MacOS, Li
 ./TinyLlama-1.1B-Chat-v1.0.Q5_K_M.llamafile --server --nobrowser
 ```
 
-Now you can make calls to the llamafile's REST API. By default, the llamafile server listens at [localhost:8080](http://localhost:8080). You can find full server documentation [here](https://github.com/Mozilla-Ocho/llamafile/blob/main/llama.cpp/server/README.md#api-endpoints). You can interact with the llamafile directly via the REST API, but here we'll show how to interact with it using LangChain.
+Now you can make calls to the llamafile's REST API. By default, the llamafile server listens at [localhost:8080](http://localhost:8080). You can find full server documentation in the [llama.cpp server API endpoints README](https://github.com/Mozilla-Ocho/llamafile/blob/main/llama.cpp/server/README.md#api-endpoints). You can interact with the llamafile directly via the REST API, but here we'll show how to interact with it using LangChain.
 
 ## Usage
 
@@ -38,7 +39,7 @@ llm = Llamafile()
 llm.invoke("Tell me a joke")
 ```
 
-```output
+```text
 '? \nI\'ve got a thing for pink, but you know that.\n"Can we not talk about work anymore?" - What did she say?\nI don\'t want to be a burden on you.\nIt\'s hard to keep a good thing going.\nYou can\'t tell me what I want, I have a life too!'
 ```
 
@@ -53,7 +54,7 @@ for chunks in llm.stream(query):
 print()
 ```
 
-```output
+```text
 .
 - She said, "I’m tired of my life. What should I do?"
 - The man replied, "I hear you. But don’t worry. Life is just like a joke. It has its funny parts too."
@@ -66,9 +67,11 @@ print()
 
 ---
 
-<Callout icon="pen-to-square" iconType="regular">
-    [Edit the source of this page on GitHub.](https://github.com/langchain-ai/docs/edit/main/src/oss/python/integrations/llms/llamafile.mdx)
+<div className="source-links">
+<Callout icon="edit">
+    [Edit this page on GitHub](https://github.com/langchain-ai/docs/edit/main/src/oss/python/integrations/llms/llamafile.mdx) or [file an issue](https://github.com/langchain-ai/docs/issues/new/choose).
 </Callout>
-<Tip icon="terminal" iconType="regular">
-    [Connect these docs programmatically](/use-these-docs) to Claude, VSCode, and more via MCP for    real-time answers.
-</Tip>
+<Callout icon="terminal-2">
+    [Connect these docs](/use-these-docs) to Claude, VSCode, and more via MCP for real-time answers.
+</Callout>
+</div>

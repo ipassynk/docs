@@ -1,5 +1,6 @@
 ---
-title: OctoAI
+title: "OctoAI integration"
+description: "Integrate with the OctoAI LLM using LangChain Python."
 ---
 
 [OctoAI](https://docs.octoai.cloud/docs) offers easy access to efficient compute and enables users to integrate their choice of AI models into applications. The `OctoAI` compute service helps you run, tune, and scale AI applications easily.
@@ -12,7 +13,7 @@ To run our example app, there are two simple steps to take:
 
 1. Get an API Token from [your OctoAI account page](https://octoai.cloud/settings).
 
-2. Paste your API key in in the code cell below.
+2. Paste your API key in the code cell below.
 
 Note: If you want to use a different LLM model, you can containerize the model and make a custom OctoAI endpoint yourself, by following [Build a Container from Python](https://octo.ai/docs/bring-your-own-model/advanced-build-a-container-from-scratch-in-python) and [Create a Custom Endpoint from a Container](https://octo.ai/docs/bring-your-own-model/create-custom-endpoints-from-a-container/create-custom-endpoints-from-a-container) and then updating your `OCTOAI_API_BASE` environment variable.
 
@@ -23,7 +24,7 @@ os.environ["OCTOAI_API_TOKEN"] = "OCTOAI_API_TOKEN"
 ```
 
 ```python
-from langchain.chains import LLMChain
+from langchain_classic.chains import LLMChain
 from langchain_community.llms.octoai_endpoint import OctoAIEndpoint
 from langchain_core.prompts import PromptTemplate
 ```
@@ -57,9 +58,11 @@ Leonardo da Vinci was a true Renaissance man. He was born in 1452 in Vinci, Ital
 
 ---
 
-<Callout icon="pen-to-square" iconType="regular">
-    [Edit the source of this page on GitHub.](https://github.com/langchain-ai/docs/edit/main/src/oss/python/integrations/llms/octoai.mdx)
+<div className="source-links">
+<Callout icon="edit">
+    [Edit this page on GitHub](https://github.com/langchain-ai/docs/edit/main/src/oss/python/integrations/llms/octoai.mdx) or [file an issue](https://github.com/langchain-ai/docs/issues/new/choose).
 </Callout>
-<Tip icon="terminal" iconType="regular">
-    [Connect these docs programmatically](/use-these-docs) to Claude, VSCode, and more via MCP for    real-time answers.
-</Tip>
+<Callout icon="terminal-2">
+    [Connect these docs](/use-these-docs) to Claude, VSCode, and more via MCP for real-time answers.
+</Callout>
+</div>

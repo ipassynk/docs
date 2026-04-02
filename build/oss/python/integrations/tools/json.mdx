@@ -1,11 +1,12 @@
 ---
-title: JSON Toolkit
+title: "JSON toolkit integration"
+description: "Integrate with the JSON toolkit using LangChain Python."
 ---
 
 This notebook showcases an agent interacting with large `JSON/dict` objects.
 This is useful when you want to answer questions about a JSON blob that's too large to fit in the context window of an LLM. The agent is able to iteratively explore the blob to find what it needs to answer the user's question.
 
-In the below example, we are using the OpenAPI spec for the OpenAI API, which you can find [here](https://github.com/openai/openai-openapi/blob/master/openapi.yaml).
+In the below example, we are using the OpenAPI spec for the OpenAI API, which you can find in the [OpenAI OpenAPI spec repository](https://github.com/openai/openai-openapi/blob/master/openapi.yaml).
 
 We will use the JSON agent to answer some questions about the API spec.
 
@@ -25,7 +26,7 @@ from langchain_openai import OpenAI
 ```python
 with open("openai_openapi.yml") as f:
     data = yaml.load(f, Loader=yaml.FullLoader)
-json_spec = JsonSpec(dict_={}, max_value_length=4000)
+json_spec = JsonSpec(dict_=data, max_value_length=4000)
 json_toolkit = JsonToolkit(spec=json_spec)
 
 json_agent_executor = create_json_agent(
@@ -41,7 +42,7 @@ Let's see what individual tools are inside the Jira toolkit.
 [(el.name, el.description) for el in json_toolkit.get_tools()]
 ```
 
-```output
+```text
 [('json_spec_list_keys',
   '\n    Can be used to list all keys at a given path. \n    Before calling this you should be SURE that the path to this exists.\n    The input is a text representation of the path to the dict in Python syntax (e.g. data["key1"][0]["key2"]).\n    '),
  ('json_spec_get_value',
@@ -56,7 +57,7 @@ json_agent_executor.run(
 )
 ```
 
-```output
+```text
 > Entering new AgentExecutor chain...
 Action: json_spec_list_keys
 Action Input: data
@@ -111,7 +112,7 @@ Final Answer: The required parameters in the request body to the /completions en
 > Finished chain.
 ```
 
-```output
+```text
 "The required parameters in the request body to the /completions endpoint are 'model'."
 ```
 
@@ -121,9 +122,11 @@ Final Answer: The required parameters in the request body to the /completions en
 
 ---
 
-<Callout icon="pen-to-square" iconType="regular">
-    [Edit the source of this page on GitHub.](https://github.com/langchain-ai/docs/edit/main/src/oss/python/integrations/tools/json.mdx)
+<div className="source-links">
+<Callout icon="edit">
+    [Edit this page on GitHub](https://github.com/langchain-ai/docs/edit/main/src/oss/python/integrations/tools/json.mdx) or [file an issue](https://github.com/langchain-ai/docs/issues/new/choose).
 </Callout>
-<Tip icon="terminal" iconType="regular">
-    [Connect these docs programmatically](/use-these-docs) to Claude, VSCode, and more via MCP for    real-time answers.
-</Tip>
+<Callout icon="terminal-2">
+    [Connect these docs](/use-these-docs) to Claude, VSCode, and more via MCP for real-time answers.
+</Callout>
+</div>

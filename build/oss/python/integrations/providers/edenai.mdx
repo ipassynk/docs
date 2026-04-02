@@ -1,5 +1,6 @@
 ---
-title: Eden AI
+title: "Eden AI integrations"
+description: "Integrate with Eden AI using LangChain Python."
 ---
 
 >[Eden AI](https://docs.edenai.co/docs/getting-started-with-eden-ai) user interface (UI)
@@ -7,11 +8,11 @@ title: Eden AI
 > you can perform no-code AI using the best engines for the market.
 
 
-## Installation and Setup
+## Installation and setup
 
 Accessing the Eden AI API requires an API key, which you can get by
 [creating an account](https://app.edenai.run/user/register) and
-heading [here](https://app.edenai.run/admin/account/settings).
+heading in the [Eden AI account settings](https://app.edenai.run/admin/account/settings).
 
 ## LLMs
 
@@ -32,7 +33,7 @@ from langchain_community.chat_models.edenai import ChatEdenAI
 
 ## Embedding models
 
-See a [usage example](/oss/python/integrations/text_embedding/edenai).
+See a [usage example](/oss/python/integrations/embeddings/edenai).
 
 ```python
 from langchain_community.embeddings.edenai import EdenAiEmbeddings
@@ -65,9 +66,11 @@ from langchain_community.tools.edenai import (
 
 ---
 
-<Callout icon="pen-to-square" iconType="regular">
-    [Edit the source of this page on GitHub.](https://github.com/langchain-ai/docs/edit/main/src/oss/python/integrations/providers/edenai.mdx)
+<div className="source-links">
+<Callout icon="edit">
+    [Edit this page on GitHub](https://github.com/langchain-ai/docs/edit/main/src/oss/python/integrations/providers/edenai.mdx) or [file an issue](https://github.com/langchain-ai/docs/issues/new/choose).
 </Callout>
-<Tip icon="terminal" iconType="regular">
-    [Connect these docs programmatically](/use-these-docs) to Claude, VSCode, and more via MCP for    real-time answers.
-</Tip>
+<Callout icon="terminal-2">
+    [Connect these docs](/use-these-docs) to Claude, VSCode, and more via MCP for real-time answers.
+</Callout>
+</div>

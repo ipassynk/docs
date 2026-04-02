@@ -1,5 +1,6 @@
 ---
-title: Cohere
+title: "Cohere integration"
+description: "Integrate with the Cohere LLM using LangChain Python."
 ---
 
 <Warning>
@@ -10,7 +11,7 @@ You may be looking for [this page instead](/oss/python/integrations/chat/cohere/
 
 >[Cohere](https://cohere.ai/about) is a Canadian startup that provides natural language processing models that help companies improve human-machine interactions.
 
-Head to the [API reference](https://python.langchain.com/api_reference/community/llms/langchain_community.llms.cohere.Cohere.html) for detailed documentation of all attributes and methods.
+Head to the [API reference](https://reference.langchain.com/python/langchain-community/llms/cohere/Cohere) for detailed documentation of all attributes and methods.
 
 ## Overview
 
@@ -18,7 +19,7 @@ Head to the [API reference](https://python.langchain.com/api_reference/community
 
 | Class | Package | Local | Serializable | [JS support](https://js.langchain.com/docs/integrations/llms/cohere/) | Downloads | Version |
 | :--- | :--- | :---: | :---: |  :---: | :---: | :---: |
-| [Cohere](https://python.langchain.com/api_reference/community/llms/langchain_community.llms.cohere.Cohere.html) | [langchain-community](https://python.langchain.com/api_reference/community/index.html) | ❌ | beta | ✅ | ![PyPI - Downloads](https://img.shields.io/pypi/dm/langchain_community?style=flat-square&label=%20) | ![PyPI - Version](https://img.shields.io/pypi/v/langchain_community?style=flat-square&label=%20) |
+| [`Cohere`](https://reference.langchain.com/python/langchain-community/llms/cohere/Cohere) | [`langchain-community`](https://reference.langchain.com/python/langchain-community) | ❌ | beta | ✅ | ![PyPI - Downloads](https://img.shields.io/pypi/dm/langchain_community?style=flat-square&label=%20) | ![PyPI - Version](https://img.shields.io/pypi/v/langchain_community?style=flat-square&label=%20) |
 
 ## Setup
 
@@ -67,7 +68,7 @@ message = "Knock knock"
 model.invoke(message)
 ```
 
-```output
+```text
 " Who's there?"
 ```
 
@@ -75,7 +76,7 @@ model.invoke(message)
 await model.ainvoke(message)
 ```
 
-```output
+```text
 " Who's there?"
 ```
 
@@ -84,7 +85,7 @@ for chunk in model.stream(message):
     print(chunk, end="", flush=True)
 ```
 
-```output
+```text
  Who's there?
 ```
 
@@ -92,7 +93,7 @@ for chunk in model.stream(message):
 model.batch([message])
 ```
 
-```output
+```text
 [" Who's there?"]
 ```
 
@@ -100,13 +101,15 @@ model.batch([message])
 
 ## API reference
 
-For detailed documentation of all `Cohere` llm features and configurations head to the API reference: [python.langchain.com/api_reference/community/llms/langchain_community.llms.cohere.Cohere.html](https://python.langchain.com/api_reference/community/llms/langchain_community.llms.cohere.Cohere.html)
+For detailed documentation of all `Cohere` llm features and configurations head to the [API reference](https://reference.langchain.com/python/langchain-community/llms/cohere/Cohere)
 
 ---
 
-<Callout icon="pen-to-square" iconType="regular">
-    [Edit the source of this page on GitHub.](https://github.com/langchain-ai/docs/edit/main/src/oss/python/integrations/llms/cohere.mdx)
+<div className="source-links">
+<Callout icon="edit">
+    [Edit this page on GitHub](https://github.com/langchain-ai/docs/edit/main/src/oss/python/integrations/llms/cohere.mdx) or [file an issue](https://github.com/langchain-ai/docs/issues/new/choose).
 </Callout>
-<Tip icon="terminal" iconType="regular">
-    [Connect these docs programmatically](/use-these-docs) to Claude, VSCode, and more via MCP for    real-time answers.
-</Tip>
+<Callout icon="terminal-2">
+    [Connect these docs](/use-these-docs) to Claude, VSCode, and more via MCP for real-time answers.
+</Callout>
+</div>
