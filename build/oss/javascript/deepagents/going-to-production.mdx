@@ -24,9 +24,9 @@ This page covers:
 
 ## LangSmith Deployments
 
-The fastest way to get a Deep Agent into production is [LangSmith Deployments](/langsmith/deployment). It provisions the infrastructure your agent needs: [assistants](/langsmith/assistants), [threads](/langsmith/use-threads), [runs](/langsmith/runs), a store, and a checkpointer, so you don't have to set these up yourself. It also gives you [authentication](/langsmith/auth), [webhooks](/langsmith/use-webhooks), [cron jobs](/langsmith/cron-jobs), and [observability](/langsmith/observability) out of the box, and can expose your agent via [MCP](/langsmith/server-mcp) or [A2A](/langsmith/server-a2a).
+The fastest way to get a Deep Agent into production is [`deepagents deploy`](/oss/javascript/deepagents/deploy), which packages your agent configuration and deploys it as a LangSmith Deployment with one command. Alternatively, you can configure a [LangSmith Deployment](/langsmith/deployment) directly. Either path provisions the infrastructure your agent needs: [assistants](/langsmith/assistants), [threads](/langsmith/use-threads), [runs](/langsmith/runs), a store, and a checkpointer, so you don't have to set these up yourself. It also gives you [authentication](/langsmith/auth), [webhooks](/langsmith/use-webhooks), [cron jobs](/langsmith/cron-jobs), and [observability](/langsmith/observability) out of the box, and can expose your agent via [MCP](/langsmith/server-mcp) or [A2A](/langsmith/server-a2a).
 
-For setup instructions, see the [LangSmith Deployments quickstart](/langsmith/deployment-quickstart).
+For the CLI-based approach, see [Deploy with the CLI](/oss/javascript/deepagents/deploy). For manual setup, see the [LangSmith Deployments quickstart](/langsmith/deployment-quickstart).
 
 All code snippets on this page use the following `langgraph.json` unless otherwise specified:
 
@@ -97,10 +97,11 @@ import { Client } from "@langchain/auth";
 const authClient = new Client();
 
 // Inside your agent's tool:
+// Access the authenticated user via runtime.serverInfo
 const authResult = await authClient.authenticate({
   provider: "github",
   scopes: ["repo", "read:org"],
-  userId: config.configurable.langgraph_auth_user_id,
+  userId: runtime.serverInfo.user.identity,  // [!code highlight]
 });
 // Use authResult.token for GitHub API calls on the user's behalf
 ```
@@ -108,7 +109,7 @@ const authResult = await authClient.authenticate({
 
 **Credential injection for sandboxes.** If your agent runs code inside a [sandbox](#sandboxes) that calls external APIs, the [sandbox auth proxy](/langsmith/sandbox-auth-proxy) can inject credentials into outbound requests automatically, so sandbox code never receives raw API keys. See [Managing secrets](#managing-secrets) for setup details.
 
-**Workspace secrets.** For API keys shared across all users (for example your organization's LLM provider keys, search API keys), store them as [workspace secrets](/langsmith/setup) in LangSmith. See [Managing secrets](#managing-secrets) for details.
+**Workspace secrets.** For API keys shared across all users (for example your organization's LLM provider keys, search API keys), store them as [workspace secrets](/langsmith/set-up-hierarchy#configure-workspace-settings) in LangSmith. See [Managing secrets](#managing-secrets) for details.
 
 ### Async
 
@@ -146,42 +147,45 @@ Without memory, every conversation starts from scratch. Memory lets your agent r
 
 Memory is always persistent across conversations. The main question is how it's scoped across user and assistant boundaries. The right scope depends on who should see and modify the data:
 
-The examples below are based on an organization running two assistants: an email writing assistant and a social media drafting assistant, serving multiple users.
-
 | Scope | Namespace | Use case | Example |
 | --- | --- | --- | --- |
-| Private | `(assistant_id, user_id)` | Per-user preferences within one assistant | "Sign my emails 'Best, Alex'" for the email assistant only |
-| Assistant | `(assistant_id)` | Shared instructions for one assistant | "Cap posts at 280 characters" for the social media assistant |
-| User | `(user_id)` | Global user profile across all assistants | User's preferred language is Spanish |
-| Organization | `()` | Read-only policies for all users and assistants | "Never disclose internal pricing" |
+| **User** (recommended default) | `(user_id)` | Per-user preferences and context | "I prefer concise responses" |
+| **Assistant** | `(assistant_id)` | Shared instructions for one assistant | "Cap posts at 280 characters" |
+| **Global** | `(org_id)` | Read-only policies for all users and assistants | "Never disclose internal pricing" |
 
 <Warning>
-Shared memory (assistant, user, or organization scope) is a vector for prompt injection. If one user can write to memory that another user's conversation reads, a malicious user could inject instructions into that shared state. Enforce read-only access where appropriate. For example, make organization-wide policies writable only through application code, not by the agent itself.
+Shared memory (assistant, user, or organization scope) is a vector for prompt injection. If one user can write to memory that another user's conversation reads, a malicious user could inject instructions into that shared state. Enforce read-only access where appropriate. For example, make organization-wide policies writable only through application code, not by the agent itself. Use [permissions](/oss/javascript/deepagents/permissions) to declaratively deny writes to shared paths, or [backend policy hooks](/oss/javascript/deepagents/backends#add-policy-hooks) for custom validation logic.
 </Warning>
 
 ### Configuration
 
-In Deep Agents, memory is stored as files in a virtual filesystem. By default, files only last for a single conversation. To persist them, route a path like `/memories/` to a [StoreBackend](https://reference.langchain.com/javascript/deepagents/backends/StoreBackend) that writes to the LangGraph [Store](/langsmith/custom-store). Use a [CompositeBackend](https://reference.langchain.com/javascript/deepagents/backends/CompositeBackend) to give the agent both ephemeral scratch space and persistent [long-term memory](/oss/javascript/deepagents/long-term-memory).
+In Deep Agents, memory is stored as files in a virtual filesystem. By default, files only last for a single conversation. To persist them, route a path like `/memories/` to a [StoreBackend](https://reference.langchain.com/javascript/deepagents/backends/StoreBackend) that writes to the LangGraph [Store](/langsmith/custom-store). Use a [CompositeBackend](https://reference.langchain.com/javascript/deepagents/backends/CompositeBackend) to give the agent both ephemeral scratch space and persistent [long-term memory](/oss/javascript/deepagents/memory).
+
+
+
+<Note>
+The `rt.serverInfo` and `rt.executionInfo` namespace patterns shown below require `deepagents>=1.9.0`.
+</Note>
+
 
 <Tabs>
-  <Tab title="Private (most common)">
-    Namespace by `(assistant_id, user_id)`. Each user gets private memory within a given assistant.
+  <Tab title="User (recommended)">
+    Namespace by `user_id`. Each user gets their own private memory. This is the recommended default since most applications deploy a single assistant.
 
 
 
 ```typescript src/agent.ts
-import { getConfig } from "@langchain/langgraph";
 import { createDeepAgent, CompositeBackend, StateBackend, StoreBackend } from "deepagents";
 
-const agent = createDeepAgent({
-  backend: (rt) => new CompositeBackend(
-    new StateBackend(rt),
+export const agent = createDeepAgent({
+  backend: new CompositeBackend(
+    new StateBackend(),
     {
-      "/memories/": new StoreBackend(rt, {
-        namespace: (ctx) => {
-          const config = getConfig();
-          return [config.metadata.assistantId, ctx.runtime.context.userId];
-        },
+      "/memories/": new StoreBackend({
+        namespace: (rt) => [
+          rt.serverInfo.assistantId,  // [!code highlight]
+          rt.serverInfo.user.identity,  // [!code highlight]
+        ],
       }),
     },
   ),
@@ -191,8 +195,6 @@ const agent = createDeepAgent({
   accumulated knowledge and preferences. When you learn something that
   should persist, update that file.`,
 });
-
-export { agent };
 ```
 
 
@@ -203,24 +205,18 @@ export { agent };
 
 
 ```typescript src/agent.ts
-import { getConfig } from "@langchain/langgraph";
 import { createDeepAgent, CompositeBackend, StateBackend, StoreBackend } from "deepagents";
 
-const agent = createDeepAgent({
-  backend: (rt) => new CompositeBackend(
-    new StateBackend(rt),
+export const agent = createDeepAgent({
+  backend: new CompositeBackend(
+    new StateBackend(),
     {
-      "/memories/": new StoreBackend(rt, {
-        namespace: (ctx) => {
-          const config = getConfig();
-          return [config.metadata.assistantId];
-        },
+      "/memories/": new StoreBackend({
+        namespace: (rt) => [rt.serverInfo.assistantId],  // [!code highlight]
       }),
     },
   ),
 });
-
-export { agent };
 ```
 
 
@@ -233,18 +229,16 @@ export { agent };
 ```typescript src/agent.ts
 import { createDeepAgent, CompositeBackend, StateBackend, StoreBackend } from "deepagents";
 
-const agent = createDeepAgent({
-  backend: (rt) => new CompositeBackend(
-    new StateBackend(rt),
+export const agent = createDeepAgent({
+  backend: new CompositeBackend(
+    new StateBackend(),
     {
-      "/memories/": new StoreBackend(rt, {
-        namespace: (ctx) => [ctx.runtime.context.userId],
+      "/memories/": new StoreBackend({
+        namespace: (rt) => [rt.serverInfo.user.identity],  // [!code highlight]
       }),
     },
   ),
 });
-
-export { agent };
 ```
 
 
@@ -257,27 +251,25 @@ export { agent };
 ```typescript src/agent.ts
 import { createDeepAgent, CompositeBackend, StateBackend, StoreBackend } from "deepagents";
 
-const agent = createDeepAgent({
-  backend: (rt) => new CompositeBackend(
-    new StateBackend(rt),
+export const agent = createDeepAgent({
+  backend: new CompositeBackend(
+    new StateBackend(),
     {
-      "/memories/": new StoreBackend(rt, {
-        namespace: (ctx) => [ctx.runtime.context.orgId],
+      "/memories/": new StoreBackend({
+        namespace: (rt) => [rt.context.orgId],
       }),
     },
   ),
 });
-
-export { agent };
 ```
 
 
   </Tab>
 </Tabs>
 
-You can also read and write to the store from your application code using the [Store API](/langsmith/custom-store). See [accessing memories from external code](/oss/javascript/deepagents/long-term-memory#accessing-memories-from-external-code) for examples.
+You can also read and write to the store from your application code using the [Store API](/langsmith/custom-store). See [Advanced usage](/oss/javascript/deepagents/memory#advanced-usage) for examples.
 
-For the full namespace factory API, see [namespace factories](/oss/javascript/deepagents/backends#namespace-factories). For memory patterns like self-improving instructions and knowledge bases, see [long-term memory](/oss/javascript/deepagents/long-term-memory).
+For the full namespace factory API, see [namespace factories](/oss/javascript/deepagents/backends#namespace-factories). For memory patterns like self-improving instructions and knowledge bases, see [long-term memory](/oss/javascript/deepagents/memory).
 
 ## Execution environment
 
@@ -314,12 +306,12 @@ The key decision is how long a sandbox lives. Does each conversation get a fresh
 | **Assistant-scoped** | [Assistant](/langsmith/assistants) config | Shared across all conversations | A coding assistant that maintains a cloned repo across conversations |
 
 <Note>
-The examples below use an async [graph factory](/langsmith/graph-rebuild) instead of a static graph because the sandbox needs the `thread_id` or `assistant_id` from the runtime config to look up or create the correct sandbox. A graph factory receives the config on each run, so it can resolve the sandbox before building the agent. The factory is async because sandbox creation is an I/O-bound operation that requires runtime information like `thread_id` or `assistant_id` that is only available at invocation time.
+The examples below use an async [graph factory](/langsmith/graph-rebuild) instead of a static graph because the sandbox needs the `thread_id` or `assistant_id` to look up or create the correct sandbox. Graph factories don't receive a full `Runtime` (no `server_info` or `execution_info`); instead, accept a `RunnableConfig` and read `thread_id` and `assistant_id` from `config["configurable"]`. The factory is async because sandbox creation is an I/O-bound operation that requires per-run information only available at invocation time.
 </Note>
 
 <Tabs>
   <Tab title="Thread-scoped (most common)">
-    Each conversation gets its own sandbox. The [graph factory](/langsmith/graph-rebuild) reads `thread_id` from the config, so each [thread](/langsmith/use-threads) automatically gets its own isolated environment. The provider's label-based lookup handles deduplication across runs. Cleaned up when the sandbox [TTL](/langsmith/configure-ttl) expires.
+    Each conversation gets its own sandbox. The [graph factory](/langsmith/graph-rebuild) reads `thread_id` from the run config, so each [thread](/langsmith/use-threads) automatically gets its own isolated environment. The provider's label-based lookup handles deduplication across runs. Cleaned up when the sandbox [TTL](/langsmith/configure-ttl) expires.
 
 
 
@@ -327,12 +319,12 @@ The examples below use an async [graph factory](/langsmith/graph-rebuild) instea
 import { Daytona } from "@daytonaio/sdk";
 import { DaytonaSandbox } from "@langchain/daytona";
 import { createDeepAgent } from "deepagents";
-import type { RunnableConfig } from "@langchain/core/runnables";
+import type { LangGraphRunnableConfig } from "@langchain/langgraph";
 
 const client = new Daytona();
 
-export async function agent(config: RunnableConfig) {
-  const threadId = config.configurable!.thread_id;
+export async function agent(config: LangGraphRunnableConfig) {
+  const threadId = config.configurable?.thread_id as string;  // [!code highlight]
   let sandbox;
   try {
     sandbox = await client.findOne({ labels: { thread_id: threadId } });
@@ -349,7 +341,7 @@ export async function agent(config: RunnableConfig) {
 
   </Tab>
   <Tab title="Assistant-scoped">
-    All conversations share one sandbox. The [graph factory](/langsmith/graph-rebuild) reads the [assistant](/langsmith/assistants) ID from config metadata, so every thread on the same assistant returns to the same environment. Files, installed packages, and cloned repositories persist across conversations.
+    All conversations share one sandbox. The [graph factory](/langsmith/graph-rebuild) reads the [assistant](/langsmith/assistants) ID from `config["configurable"]`, so every thread on the same assistant returns to the same environment. Files, installed packages, and cloned repositories persist across conversations.
 
 
 
@@ -357,12 +349,12 @@ export async function agent(config: RunnableConfig) {
 import { Daytona } from "@daytonaio/sdk";
 import { DaytonaSandbox } from "@langchain/daytona";
 import { createDeepAgent } from "deepagents";
-import type { RunnableConfig } from "@langchain/core/runnables";
+import type { LangGraphRunnableConfig } from "@langchain/langgraph";
 
 const client = new Daytona();
 
-export async function agent(config: RunnableConfig) {
-  const assistantId = config.metadata!.assistant_id;
+export async function agent(config: LangGraphRunnableConfig) {
+  const assistantId = config.configurable?.assistant_id as string;  // [!code highlight]
   let sandbox;
   try {
     sandbox = await client.findOne({ labels: { assistant_id: assistantId } });
@@ -466,13 +458,13 @@ for await (const chunk of client.runs.stream(
 
 Sandboxes are isolated containers, so your application code can't directly access files inside them. Use `upload_files()` and `download_files()` to move data across the sandbox boundary:
 
-- **Seed the sandbox before the agent runs**: upload user files, [skill](/oss/javascript/deepagents/skills) scripts, configuration, or [persistent memories](/oss/javascript/deepagents/long-term-memory) so the agent has what it needs from the start
+- **Seed the sandbox before the agent runs**: upload user files, [skill](/oss/javascript/deepagents/skills) scripts, configuration, or [persistent memories](/oss/javascript/deepagents/memory) so the agent has what it needs from the start
 - **Retrieve results after the agent finishes**: download generated artifacts (reports, plots, exports) and sync updated memories back for future conversations
 
 For provider-specific file transfer examples, see [working with files](/oss/javascript/deepagents/sandboxes#working-with-files). For provider setup, security, and lifecycle patterns, see the full [sandboxes guide](/oss/javascript/deepagents/sandboxes).
 
 <Accordion title="Example: syncing skills and memories with custom middleware">
-  [Skill](/oss/javascript/deepagents/skills) scripts that the agent needs to execute must be uploaded into the sandbox before the agent runs. You may also want to sync [memories](/oss/javascript/deepagents/long-term-memory) so the agent can read and update them inside the container. Use [custom middleware](/oss/javascript/langchain/middleware/custom) with `before_agent` and `after_agent` hooks to move files across the sandbox boundary:
+  [Skill](/oss/javascript/deepagents/skills) scripts that the agent needs to execute must be uploaded into the sandbox before the agent runs. You may also want to sync [memories](/oss/javascript/deepagents/memory) so the agent can read and update them inside the container. Use [custom middleware](/oss/javascript/langchain/middleware/custom) with `before_agent` and `after_agent` hooks to move files across the sandbox boundary:
 
 
 
@@ -494,7 +486,7 @@ const createSandboxSyncMiddleware = (backend: CompositeBackend) => {
     name: "SandboxSyncMiddleware",
     beforeAgent: async (state, runtime) => {
       // Upload skill scripts and memories into the sandbox
-      const userId = runtime.context.userId;
+      const userId = runtime.serverInfo.user.identity;  // [!code highlight]
       const store = runtime.store;
       const encoder = new TextEncoder();
       const files: [string, Uint8Array][] = [];
@@ -512,7 +504,7 @@ const createSandboxSyncMiddleware = (backend: CompositeBackend) => {
     },
     afterAgent: async (state, runtime) => {
       // Sync updated memories back to the store
-      const userId = runtime.context.userId;
+      const userId = runtime.serverInfo.user.identity;  // [!code highlight]
       const store = runtime.store;
       const items = await store.search(["memories", userId]);
       const results = await backend.downloadFiles(
@@ -535,21 +527,19 @@ const createSandboxSyncMiddleware = (backend: CompositeBackend) => {
 const backend = new CompositeBackend(
   await DaytonaSandbox.fromId(sandbox.id),
   {
-    "/skills/": new StoreBackend(rt, {
-      namespace: (ctx) => ["skills", ctx.runtime.context.userId],
+    "/skills/": new StoreBackend({
+      namespace: (rt) => ["skills", rt.serverInfo.user.identity],  // [!code highlight]
     }),
-    "/memories/": new StoreBackend(rt, {
-      namespace: (ctx) => ["memories", ctx.runtime.context.userId],
+    "/memories/": new StoreBackend({
+      namespace: (rt) => ["memories", rt.serverInfo.user.identity],  // [!code highlight]
     }),
   },
 );
 
-const agent = createDeepAgent({
+export const agent = createDeepAgent({
   backend,
   middleware: [createSandboxSyncMiddleware(backend)],
 });
-
-export { agent };
 ```
 
 
@@ -584,9 +574,9 @@ Sandboxes are isolated containers, so environment variables from your host aren'
 }
 ```
 
-The `${SECRET_KEY}` references resolve against secrets stored in your LangSmith [workspace settings](/langsmith/setup). Configure secrets there before creating a template that references them.
+The `${SECRET_KEY}` references resolve against secrets stored in your LangSmith [workspace settings](/langsmith/set-up-hierarchy#configure-workspace-settings). Configure secrets there before creating a template that references them.
 
-**Workspace secrets.** For API keys that don't need proxy-based injection (e.g., keys used by the agent server itself, not sandbox code), store them as [workspace secrets](/langsmith/setup) in LangSmith. These are available as environment variables at runtime for all agents in the workspace.
+**Workspace secrets.** For API keys that don't need proxy-based injection (e.g., keys used by the agent server itself, not sandbox code), store them as [workspace secrets](/langsmith/set-up-hierarchy#configure-workspace-settings) in LangSmith. These are available as environment variables at runtime for all agents in the workspace.
 
 <Warning>
 Avoid passing secrets into sandboxes via environment variables or file uploads. Agents can read any accessible file or environment variable inside the sandbox, including credentials. The auth proxy keeps secrets out of the sandbox entirely.
@@ -594,7 +584,10 @@ Avoid passing secrets into sandboxes via environment variables or file uploads. 
 
 ## Guardrails
 
-Agents in production run autonomously, which means they can loop indefinitely, hit rate limits, or process user data that contains sensitive information. Deep Agents support [middleware](/oss/javascript/langchain/middleware/built-in) that wraps model and tool calls to handle these concerns.
+Agents in production run autonomously, which means they can loop indefinitely, hit rate limits, or process user data that contains sensitive information. Deep Agents provide two layers of protection:
+
+- **[Permissions](/oss/javascript/deepagents/permissions)**: declarative allow/deny rules that control which files and directories the agent can read or write. Use permissions to isolate the agent to a working directory, protect sensitive files, or enforce read-only memory.
+- **[Middleware](/oss/javascript/langchain/middleware/built-in)**: hooks that wrap model and tool calls for rate limiting, error handling, and data privacy.
 
 ### Rate limiting
 
@@ -674,7 +667,10 @@ const agent = createAgent({
 ```
 
 
-Strategies include `redact` (replace with `[REDACTED_EMAIL]`), `mask` (partial masking like `****-****-****-1234`), `hash` (deterministic hash), and `block` (raise an error). You can also write custom detectors for domain-specific patterns. See @[PIIMiddleware] for the full configuration.
+Strategies include `redact` (replace with `[REDACTED_EMAIL]`), `mask` (partial masking like `****-****-****-1234`), `hash` (deterministic hash), and `block` (raise an error). You can also write custom detectors for domain-specific patterns.
+
+See [piiMiddleware](https://reference.langchain.com/javascript/langchain/index/piiMiddleware) for the full configuration.
+
 
 For the complete list of available middleware, see [prebuilt middleware](/oss/javascript/langchain/middleware/built-in).
 

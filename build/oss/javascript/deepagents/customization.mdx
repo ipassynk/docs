@@ -44,14 +44,34 @@ import SandboxBasicJs from '/snippets/deepagents-sandbox-basic-js.mdx';
 
 ```typescript
 const agent = createDeepAgent({
-  name?: string,
   model?: BaseLanguageModel | string,
   tools?: TTools | StructuredTool[],
   systemPrompt?: string | SystemMessage,
+  middleware?: TMiddleware,
+  subagents?: TSubagents,
+  responseFormat?: TResponse,
+  backend?: AnyBackendProtocol | ((config) => AnyBackendProtocol),
+  interruptOn?: Record<string, boolean | InterruptOnConfig>,
+  memory?: string[],
+  skills?: string[],
+  ...
 });
 ```
 
-For more information, see [Customizing Deep Agents](https://reference.langchain.com/javascript/modules/deepagents.html#customizing-deep-agents).
+For the full parameter list, see the [`createDeepAgent`](https://reference.langchain.com/javascript/deepagents/agent/createDeepAgent) API reference.
+
+
+## Model
+
+Pass a `model` string in `provider:model` format, or an initialized model instance. Defaults to `anthropic:claude-sonnet-4-6`. See [supported models](/oss/javascript/deepagents/models#supported-models) for all providers and [suggested models](/oss/javascript/deepagents/models#suggested-models) for tested recommendations.
+
+<Tip>
+    Use the `provider:model` format (for example `openai:gpt-5`) to quickly switch between models.
+</Tip>
+
+
+
+<ChatModelTabsDaJs />
 
 
 ### Connection resilience
@@ -79,20 +99,9 @@ const agent = createDeepAgent({
 
 
 
-<Tip>For long-running agent tasks on unreliable networks, consider increasing `max_retries` to 10–15 and pairing it with a [checkpointer](/oss/javascript/langgraph/persistence) so that progress is preserved across failures.</Tip>
-
-## Model
-
-By default, `deepagents` uses [`claude-sonnet-4-6`](https://platform.claude.com/docs/en/about-claude/models/overview). You can customize the model by passing any supported <Tooltip tip="A string that follows the format `provider:model` (e.g. openai:gpt-5)" cta="See mappings" href="https://reference.langchain.com/python/langchain/models/#langchain.chat_models.init_chat_model(model)">model identifier string</Tooltip> or [LangChain model object](/oss/javascript/integrations/chat).
-
 <Tip>
-    Use the `provider:model` format (for example `openai:gpt-5`) to quickly switch between models.
+    For long-running agent tasks on unreliable networks, consider increasing `max_retries` to 10–15 and pairing it with a [checkpointer](/oss/javascript/langgraph/persistence) so that progress is preserved across failures.
 </Tip>
-
-
-
-<ChatModelTabsDaJs />
-
 
 ## Tools
 
@@ -185,7 +194,6 @@ If you are using memory, skills, or human-in-the-loop, the following middleware 
 - [`MemoryMiddleware`](https://reference.langchain.com/javascript/deepagents/middleware/createMemoryMiddleware): Persists and retrieves conversation context across sessions when the `memory` argument is provided
 - [`SkillsMiddleware`](https://reference.langchain.com/javascript/deepagents/middleware/createSkillsMiddleware): Enables custom skills when the `skills` argument is provided
 - `HumanInTheLoopMiddleware`: Pauses for human approval or input at specified points when the `interruptOn` argument is provided
-:::
 
 ### Pre-built middleware
 
@@ -193,9 +201,13 @@ LangChain exposes additional pre-built middleware that let you add-on various fe
 
 
 
-The `deepagents` package also exposes [createSummarizationMiddleware](https://reference.langchain.com/javascript/deepagents/middleware/createSummarizationMiddleware) for the same workflow. For more detail, see [Summarization in the harness](/oss/javascript/deepagents/harness#summarization).
+The `deepagents` package also exposes [createSummarizationMiddleware](https://reference.langchain.com/javascript/deepagents/middleware/createSummarizationMiddleware) for the same workflow. For more detail, see [Summarization](/oss/javascript/deepagents/context-engineering#summarization).
 
 
+
+### Provider-specific middleware
+
+For provider-specific middleware that is optimized for specific LLM providers, see [Official integrations](/oss/javascript/integrations/middleware#official-integrations) and [Community integrations](/oss/javascript/integrations/middleware#community-integrations).
 
 ### Custom middleware
 
@@ -246,7 +258,7 @@ const logToolCallsMiddleware = createMiddleware({
 });
 
 const agent = await createDeepAgent({
-  model: "claude-sonnet-4-20250514",
+  model: "anthropic:claude-sonnet-4-6",
   tools: [getWeather] as any,
   middleware: [logToolCallsMiddleware] as any,
 });
@@ -261,9 +273,9 @@ Graph state is scoped to a thread by design, so updates are safe under concurren
 
 **Do this:**
 
-::
 
-:```typescript
+
+```typescript
 const customMiddleware = createMiddleware({
   name: "CustomMiddleware",
   beforeAgent: async (state) => {
@@ -271,13 +283,13 @@ const customMiddleware = createMiddleware({
   },
 });
 ```
-:
+
 
 Do **not** do this:
 
-::
 
-:```typescript
+
+```typescript
 let x = 1;
 
 const customMiddleware = createMiddleware({
@@ -287,7 +299,7 @@ const customMiddleware = createMiddleware({
   },
 });
 ```
-:
+
 
 
 Mutation in place, such as modifying `state.x` in `beforeAgent`, mutating a shared variable in `beforeAgent`, or changing other shared values in hooks, can lead to subtle bugs and race conditions because many operations run concurrently (subagents, parallel tools, and parallel invocations on different threads).
@@ -455,7 +467,8 @@ You can pass one or more file paths to the `memory` parameter when creating your
     function createFileData(content: string): FileData {
       const now = new Date().toISOString();
       return {
-        content: content.split("\n"),
+        content,
+        mimeType: "text/plain",
         created_at: now,
         modified_at: now,
       };
@@ -487,7 +500,6 @@ You can pass one or more file paths to the `memory` parameter when creating your
     import {
       InMemoryStore,
       MemorySaver,
-      type BaseStore,
     } from "@langchain/langgraph";
 
     const AGENTS_MD_URL =
@@ -506,7 +518,8 @@ You can pass one or more file paths to the `memory` parameter when creating your
     function createFileData(content: string): FileData {
       const now = new Date().toISOString();
       return {
-        content: content.split("\n"),
+        content,
+        mimeType: "text/plain",
         created_at: now,
         modified_at: now,
       };
@@ -518,15 +531,8 @@ You can pass one or more file paths to the `memory` parameter when creating your
 
     const checkpointer = new MemorySaver();
 
-    const backendFactory = (config: { state: unknown; store?: BaseStore }) => {
-      return new StoreBackend({
-        state: config.state,
-        store: config.store ?? store,
-      });
-    };
-
     const agent = await createDeepAgent({
-      backend: backendFactory,
+      backend: new StoreBackend(),
       store: store,
       checkpointer: checkpointer,
       memory: ["/AGENTS.md"],
@@ -554,8 +560,7 @@ You can pass one or more file paths to the `memory` parameter when creating your
     const checkpointer = new MemorySaver();
 
     const agent = await createDeepAgent({
-      backend: (config) =>
-        new FilesystemBackend({ rootDir: "/Users/user/{project}" }),
+      backend: new FilesystemBackend({ rootDir: "/Users/user/{project}" }),
       memory: ["./AGENTS.md", "./.deepagents/AGENTS.md"],
       interruptOn: {
         read_file: true,

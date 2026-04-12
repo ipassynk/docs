@@ -76,11 +76,11 @@ interrupt_on = {
 When an interrupt is triggered, the agent pauses execution and returns control. Check for interrupts in the result and handle them accordingly.
 
 ```python
-import uuid
+from langchain_core.utils.uuid import uuid7
 from langgraph.types import Command
 
 # Create config with thread_id for state persistence
-config = {"configurable": {"thread_id": str(uuid.uuid4())}}
+config = {"configurable": {"thread_id": str(uuid7())}}
 
 # Invoke the agent
 result = agent.invoke(
@@ -130,7 +130,7 @@ print(result.value["messages"][-1].content)  # [!code highlight]
 When the agent calls multiple tools that require approval, all interrupts are batched together in a single interrupt. You must provide decisions for each one in order.
 
 ```python
-config = {"configurable": {"thread_id": str(uuid.uuid4())}}
+config = {"configurable": {"thread_id": str(uuid7())}}
 
 result = agent.invoke(
     {"messages": [{
@@ -205,6 +205,7 @@ Each subagent can have its own `interrupt_on` configuration that overrides the m
 
 ```python
 agent = create_deep_agent(
+    model="openai:gpt-5.4",
     tools=[delete_file, read_file],
     interrupt_on={
         "delete_file": True,
@@ -276,6 +277,7 @@ def main():
     )
 
     parent_agent = create_deep_agent(
+        model="openai:gpt-5.4",
         checkpointer=checkpointer,
         subagents=[
             CompiledSubAgent(
@@ -366,6 +368,7 @@ from langgraph.checkpoint.memory import MemorySaver
 
 checkpointer = MemorySaver()
 agent = create_deep_agent(
+    model="openai:gpt-5.4",
     tools=[...],
     interrupt_on={...},
     checkpointer=checkpointer  # Required for HITL
